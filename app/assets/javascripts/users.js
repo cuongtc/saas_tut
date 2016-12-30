@@ -1,56 +1,51 @@
-/* global $, Stripe, StripeResponseHandler */
-// Document ready
-$(document).on('turbolink:load', function(){
-  var theForm = $('#pro-form');
+/* global $, Stripe */
+//Document ready.
+$(document).on('turbolinks:load', function(){
+  var theForm = $('#pro_form');
   var submitBtn = $('#form-signup-btn');
-  // Set Stripe public key
+  //Set Stripe public key.
   Stripe.setPublishableKey( $('meta[name="stripe-key"]').attr('content') );
-  // When user clicks form submit button
+  //When user clicks form submit btn,
   submitBtn.click(function(event){
-    //Prevent default submission behavior
+    //prevent default submission behavior.
     event.preventDefault();
-    submitBtn.prop('disabled', true).val('Processing');
-    // Collect Card Infomation from Fields
+    submitBtn.val("Processing").prop('disabled', true);
+    //Collect the credit card fields.
     var ccNum = $('#card_number').val(),
         cvcNum = $('#card_code').val(),
         expMonth = $('#card_month').val(),
         expYear = $('#card_year').val();
-        
-    // Use Stripe JS library to check for card errors.
+    //Use Stripe JS library to check for card errors.
     var error = false;
-    
     //Validate card number.
-    if(!Stripe.card.validateCardNumber(ccNum)){
+    if(!Stripe.card.validateCardNumber(ccNum)) {
       error = true;
       alert('The credit card number appears to be invalid');
     }
-    // Validate CVC number
-    if(!Stripe.card.validateCVC(cvcNum)){
+    //Validate CVC number.
+    if(!Stripe.card.validateCVC(cvcNum)) {
       error = true;
-      alert('The cvc number appears to be invalid');
+      alert('The CVC number appears to be invalid');
     }
-    // Validate experation date
-    if(!Stripe.card.validateExpiry(expMonth,expYear)) {
+    //Validate expiration date.
+    if(!Stripe.card.validateExpiry(expMonth, expYear)) {
       error = true;
       alert('The expiration date appears to be invalid');
     }
-    if(error){
+    if (error) {
       //If there are card errors, don't send to Stripe.
-      submitBtn.prop('disabled', false).val('Sign Up');
-    }
-    else {
-      // Send the card info to Stripe
-      // Request a token from Stripe
-      Stripe.card.createToken({
+      submitBtn.prop('disabled', false).val("Sign Up");
+    } else {
+      //Send the card info to Stripe.
+      Stripe.createToken({
         number: ccNum,
         cvc: cvcNum,
         exp_month: expMonth,
         exp_year: expYear
-      }, StripeResponseHandler);
+      }, stripeResponseHandler);
     }
-    
+    return false;
   });
-  
   //Stripe will return a card token.
   function stripeResponseHandler(status, response) {
     //Get the token from the response.
